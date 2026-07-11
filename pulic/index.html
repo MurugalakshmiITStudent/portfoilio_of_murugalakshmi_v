@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Murugalakshmi | Portfolio</title>
+
+<link rel="stylesheet"
+href="style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+    /* Timer Styles */
+    #timer-container {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    #timer-display {
+        display: inline-block;
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #6c63ff, #8b83ff);
+        color: white;
+        border-radius: 50px;
+        font-size: 20px;
+        font-weight: bold;
+        box-shadow: 0 5px 20px rgba(108, 99, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    #timer-display.warning {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        animation: pulse 0.5s ease-in-out infinite alternate;
+    }
+
+    #timer-display.success {
+        background: linear-gradient(135deg, #00b894, #00a86b);
+    }
+
+    @keyframes pulse {
+        from { transform: scale(1); }
+        to { transform: scale(1.05); }
+    }
+
+    #timer-countdown {
+        font-size: 28px;
+        color: #ffd700;
+    }
+
+    .timer-status {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #666;
+    }
+
+    .timer-status .highlight {
+        color: #6c63ff;
+        font-weight: bold;
+    }
+
+    /* Popup Styles */
+    .popup-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .popup-overlay.active {
+        display: flex;
+    }
+
+    .popup-box {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        max-width: 550px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.5s ease;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .popup-box .popup-icon {
+        font-size: 60px;
+        margin-bottom: 15px;
+    }
+
+    .popup-box h2 {
+        color: #1a1a2e;
+        margin-bottom: 10px;
+    }
+
+    .popup-box .popup-subtitle {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .popup-box .popup-details {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: left;
+        margin: 15px 0;
+        border-left: 4px solid #6c63ff;
+    }
+
+    .popup-box .popup-details .detail-row {
+        display: flex;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .popup-box .popup-details .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .popup-box .popup-details .detail-label {
+        font-weight: bold;
+        color: #6c63ff;
+        min-width: 100px;
+    }
+
+    .popup-box .popup-details .detail-value {
+        color: #333;
+        word-break: break-word;
+    }
+
+    .popup-box .popup-details .detail-value.highlight {
+        color: #6c63ff;
+        font-weight: bold;
+    }
+
+    .popup-box .popup-message-box {
+        background: #fff3e0;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 10px;
+        border-left: 4px solid #ff9800;
+    }
+
+    .popup-box .popup-message-box p {
+        margin: 0;
+        color: #333;
+        font-style: italic;
+    }
+
+    .popup-btn {
+        padding: 12px 30px;
+        background: #6c63ff;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+    }
+
+    .popup-btn:hover {
+        background: #5a52d5;
+        transform: scale(1.05);
+    }
+
+    .popup-btn.success {
+        background: #00b894;
+    }
+
+    .popup-btn.success:hover {
+        background: #00a86b;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Success Animation */
+    .success-animation {
+        display: inline-block;
+        animation: checkmark 0.5s ease;
+    }
+
+    @keyframes checkmark {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+</head>
+
+<body>
+
+<!-- POPUP OVERLAY -->
+<div id="popup-overlay" class="popup-overlay">
+    <div class="popup-box">
+        <div class="popup-icon" id="popup-icon">📧</div>
+        <h2 id="popup-title">Email Status</h2>
+        <p class="popup-subtitle" id="popup-message">Your email is being processed...</p>
+        
+        <div class="popup-details" id="popup-details">
+            <div class="detail-row">
+                <span class="detail-label">👤 Name:</span>
+                <span class="detail-value" id="popup-name">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">📧 Email:</span>
+                <span class="detail-value" id="popup-email">-</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">📝 Subject:</span>
+                <span class="detail-value" id="popup-subject">-</span>
+            </div>
+            <div class="detail-row" style="border-bottom: none; padding-bottom: 0;">
+                <span class="detail-label">💬 Message:</span>
+                <span class="detail-value" id="popup-message-text">-</span>
+            </div>
+        </div>
+
+        <div class="popup-message-box" id="popup-message-box" style="display: none;">
+            <p id="popup-final-message"></p>
+        </div>
+
+        <button class="popup-btn" id="popup-btn" onclick="closePopup()">OK, Got it!</button>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+
+<nav>
+
+<a href="#home" class="logo">
+
+Murugalakshmi
+
+</a>
+
+
+<ul>
+
+<li><a href="#home">Home</a></li>
+
+<li><a href="#about">About</a></li>
+
+<li><a href="#education">Education</a></li>
+
+<li><a href="#skills">Skills</a></li>
+
+<li><a href="#projects">Projects</a></li>
+
+<li><a href="#certificates">Certificates</a></li>
+
+<li><a href="#contact">Contact</a></li>
+
+</ul>
+
+</nav>
+
+
+
+
+
+<!-- HOME -->
+
+<section id="home">
+
+<div class="hero">
+
+
+
+<div class="left">
+
+<img
+src="images/profile.jpg"
+alt="profile">
+
+</div>
+
+
+
+<div class="right">
+
+<h1>
+
+Murugalakshmi V
+
+</h1>
+
+<h2>
+
+B.Tech Information Technology
+
+</h2>
+
+<h3>
+
+Ramco Institute of Technology
+
+</h3>
+
+
+<p>
+
+Passionate IT student interested in
+Full Stack Development,
+Web Development,
+problem solving,
+UI Design and creating impactful
+real-world projects.
+
+</p>
+
+
+
+<a
+href="./files/resume.pdf"
+download="Murugalakshmi_Resume.pdf"
+class="btn">
+
+Download Resume
+
+</a>
+
+
+
+<div class="social">
+    <a href="https://github.com/MurugalakshmiITStudent" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-github"></i>
+    </a>
+    <a href="https://www.instagram.com/murugalakshmi" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-instagram"></i>
+    </a>
+    <a href="https://www.linkedin.com/in/murugalakshmi-v-4ab799370" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-linkedin"></i>
+    </a>
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+<!-- ABOUT -->
+
+<section id="about">
+
+<h1>
+
+About Me
+
+</h1>
+
+
+<div class="card">
+
+<p>
+Hello! I am Murugalakshmi V,
+currently pursuing III year of
+Bachelor of Technology in
+Information Technology
+at Ramco Institute of Technology.
+
+I am passionate about
+software development,
+web technologies,
+problem solving,
+UI designing
+and building meaningful applications.
+
+I enjoy learning new technologies,
+participating in hackathons,
+developing projects
+and continuously improving
+my technical knowledge.
+
+</p>
+</div>
+
+</section>
+
+
+
+
+
+<!-- EDUCATION -->
+
+<section id="education">
+    <h1>Education</h1>
+
+<div class="card">
+
+<h2>
+
+School Details:
+
+</h2>
+
+<p>
+
+P.A.C.R.Ammani Ammal's Girls' Higher Secondary School
+</p>
+
+<p>SSLC: 94%</p>
+<p>HSC: 88%</p>
+
+</p>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>
+
+College
+
+</h2>
+
+<p>
+
+Ramco Institute of Technology</p>
+
+<p>B.Tech IT</p>
+
+<p>III year</p>
+
+<p>CGPA: 8.48</p>
+
+
+
+</div>
+
+
+</div>
+
+</section>
+
+
+
+
+
+<!-- SKILLS -->
+
+<section id="skills">
+
+<h1>
+
+Skills
+
+</h1>
+
+
+
+<div class="skills">
+
+
+
+<div>HTML</div>
+
+<div>CSS</div>
+
+<div>JavaScript</div>
+
+<div>Python</div>
+
+<div>Java</div>
+
+<div>SQL</div>
+
+<div>GitHub</div>
+
+<div>Responsive Design</div>
+
+<div>Problem Solving</div>
+
+<div>Frontend Development</div>
+
+</div>
+
+</section>
+
+
+
+
+
+<!-- PROJECTS -->
+
+<section id="projects">
+
+<h1>
+
+Projects
+
+</h1>
+
+
+
+<div class="grid">
+
+
+
+<div class="project">
+
+<img src="images/flappybird.jpg">
+
+<h2>
+
+Flappy Bird Game
+
+</h2>
+
+<p>
+
+Built using Python.
+
+</p>
+
+</div>
+
+
+
+
+<div class="project">
+
+<img src="images/yummygo.jpg">
+
+<h2>
+
+YummyGo
+
+</h2>
+
+<p>
+
+Food Delivery Application.
+
+</p>
+
+</div>
+
+
+
+
+<div class="project">
+
+<img src="images/business.jpg">
+
+<h2>
+
+Business Website
+
+</h2>
+
+<p>
+
+Developed using HTML CSS JavaScript.
+
+</p>
+
+</div>
+
+
+</div>
+
+</section>
+
+
+
+
+
+
+<!-- CERTIFICATES -->
+
+<section id="certificates">
+
+<h1>
+
+Certificates & Achievements
+
+</h1>
+
+
+
+<div class="grid">
+
+
+
+<div class="project">
+
+<img src="images/nptel.jpeg">
+
+<h2>
+
+NPTEL Certificate
+
+</h2>
+
+<p>
+
+Completed online certification in programming in Java.
+
+</p>
+
+</div>
+
+
+
+
+<div class="project">
+
+<img src="images/symposium.jpeg">
+
+<h2>
+
+Completed Fundamentals in Java course
+
+</h2>
+
+<p>
+Done certification course by simplilearn platform.
+</p>
+
+</div>
+
+
+
+
+<div class="project">
+
+<img src="images/aihackathon.jpeg">
+
+<h2>
+
+AI FullStack Hackathon
+
+</h2>
+
+<p>
+
+Participated in AI Hackathon.
+
+</p>
+
+</div>
+
+
+</div>
+
+</section>
+
+
+
+<!-- CONTACT SECTION -->
+<section id="contact">
+    <h1>Contact Me</h1>
+    <p class="contact-text">
+        Feel free to contact me for collaborations, projects, opportunities or discussions.
+    </p>
+
+    <!-- Timer Display -->
+    <div id="timer-container">
+        <div id="timer-display">
+            ⏱️ Email will be sent in: <span id="timer-countdown">5</span> seconds
+        </div>
+        <div class="timer-status" id="timer-status">
+            Status: <span class="highlight" id="timer-status-text">Ready to send</span>
+        </div>
+    </div>
+
+    <div class="contact-container">
+        <div class="contact-left">
+            <h2>Get In Touch</h2>
+            <p>📧 Email: murugalakshmivel954@gmail.com</p>
+            <p>📍 Tamil Nadu, India</p>
+            <p>🎓 B.Tech IT</p>
+
+            <div class="social">
+                <a href="https://www.instagram.com/murugalakshmi" target="_blank">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/murugalakshmi" target="_blank">
+                    <i class="fa-brands fa-linkedin"></i>
+                </a>
+                <a href="https://github.com/murugalakshmi" target="_blank">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="contact-right">
+            <form id="contact-form" class="contact-form">
+                <input type="text" id="name" name="name" placeholder="Enter Your Name" required>
+                <input type="email" id="email" name="email" placeholder="Enter Your Email" required>
+                <input type="text" id="subject" name="subject" placeholder="Subject" required>
+                <textarea id="message" name="message" rows="6" placeholder="Your Message" required></textarea>
+                <button type="button" onclick="startTimerAndSend()">Send Message</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>Murugalakshmi V</h3>
+            <p>B.Tech Information Technology</p>
+            <p>Ramco Institute of Technology</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4>Connect With Me</h4>
+            <div class="social-links">
+                <a href="https://github.com/MurugalakshmiITStudent" target="_blank">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+                <a href="https://www.instagram.com/murugalakshmi" target="_blank">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/murugalakshmi-v-4ab799370" target="_blank">
+                    <i class="fa-brands fa-linkedin"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 All Rights Reserved | Made by Murugalakshmi V</p>
+    </div>
+</footer>
+
+<!-- JAVASCRIPT WITH setTimeout AND setInterval -->
+<script>
+// Global variables for timer
+let timerInterval = null;
+let countdown = 5;
+let isTimerRunning = false;
+
+// Function to show popup with all details
+function showPopup(icon, title, message, name, email, subject, msg, isSuccess = false) {
+    document.getElementById('popup-icon').textContent = icon;
+    document.getElementById('popup-title').textContent = title;
+    document.getElementById('popup-message').textContent = message;
+    document.getElementById('popup-name').textContent = name || '-';
+    document.getElementById('popup-email').textContent = email || '-';
+    document.getElementById('popup-subject').textContent = subject || '-';
+    document.getElementById('popup-message-text').textContent = msg || '-';
+    
+    // Show final message box if success
+    if (isSuccess) {
+        document.getElementById('popup-message-box').style.display = 'block';
+        document.getElementById('popup-final-message').textContent = '✅ Email successfully sent to Murugalakshmi V!';
+        document.getElementById('popup-btn').className = 'popup-btn success';
+    } else {
+        document.getElementById('popup-message-box').style.display = 'none';
+        document.getElementById('popup-btn').className = 'popup-btn';
+    }
+    
+    document.getElementById('popup-overlay').classList.add('active');
+}
+
+// Function to close popup
+function closePopup() {
+    document.getElementById('popup-overlay').classList.remove('active');
+}
+
+// ONCLICK FUNCTION - Starts timer and sends email after 5 seconds
+function startTimerAndSend() {
+    console.log('🔘 Button clicked! Timer started...');
+    
+    // Get form values
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const subject = document.getElementById('subject').value;
+    const message = document.getElementById('message').value;
+
+    // Validate
+    if (!name || !email || !subject || !message) {
+        alert('❌ Please fill in all fields!');
+        return;
+    }
+
+    // Check if timer is already running
+    if (isTimerRunning) {
+        alert('⏳ Timer is already running! Please wait...');
+        return;
+    }
+
+    // Store form data in global variable
+    window.formData = {
+        name: name,
+        email: email,
+        subject: subject,
+        message: message
+    };
+
+    // Reset countdown - only 5 seconds
+    countdown = 5;
+    document.getElementById('timer-countdown').textContent = countdown;
+    document.getElementById('timer-status-text').textContent = '⏳ Waiting...';
+    document.getElementById('timer-display').className = '';
+
+    // Disable button
+    const button = document.querySelector('button[onclick="startTimerAndSend()"]');
+    button.textContent = '⏳ Waiting...';
+    button.disabled = true;
+
+    // Start timer
+    isTimerRunning = true;
+
+    // Show first popup - "After 5s it will automatically send to Murugalakshmi V"
+    showPopup(
+        '⏰',
+        'Email Will Be Sent Automatically!',
+        'After 5 seconds, your email will be automatically sent to Murugalakshmi V.',
+        name,
+        email,
+        subject,
+        message,
+        false
+    );
+
+    // setInterval - Updates countdown every second (5 seconds only)
+    timerInterval = setInterval(function() {
+        countdown--;
+        document.getElementById('timer-countdown').textContent = countdown;
+        document.getElementById('timer-status-text').textContent = `⏳ Sending in ${countdown} seconds...`;
+        
+        console.log(`⏱️ Countdown: ${countdown} seconds remaining`);
+        
+        // When countdown reaches 0 (after 5 seconds)
+        if (countdown === 0) {
+            console.log('📧 5 seconds completed! Sending email now...');
+            document.getElementById('timer-status-text').textContent = '📤 Sending email...';
+            document.getElementById('timer-display').className = 'warning';
+            document.getElementById('timer-countdown').textContent = '📤';
+            
+            // Clear the interval
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isTimerRunning = false;
+            
+            // Send the email immediately
+            sendEmailNow();
+            
+            // Show final popup with ALL form details
+            showPopup(
+                '✅',
+                'Email Sent Successfully!',
+                'Your email has been sent to Murugalakshmi V. Here are the details:',
+                window.formData.name,
+                window.formData.email,
+                window.formData.subject,
+                window.formData.message,
+                true  // This is a success popup
+            );
+            
+            // Update timer display
+            document.getElementById('timer-status-text').textContent = '✅ Sent successfully!';
+            document.getElementById('timer-display').className = 'success';
+            document.getElementById('timer-countdown').textContent = '✅';
+            
+            // Re-enable button
+            const btn = document.querySelector('button[onclick="startTimerAndSend()"]');
+            btn.textContent = 'Send Message';
+            btn.disabled = false;
+            
+            // Reset form
+            document.getElementById('contact-form').reset();
+        }
+    }, 1000);
+}
+
+// Function to send email to server
+function sendEmailNow() {
+    const formData = window.formData;
+    
+    console.log('📧 Sending email to server...');
+    console.log('👤 Name:', formData.name);
+    console.log('📧 Email:', formData.email);
+    console.log('📝 Subject:', formData.subject);
+    console.log('💬 Message:', formData.message);
+
+    // Create form data
+    const data = new URLSearchParams();
+    data.append('name', formData.name);
+    data.append('email', formData.email);
+    data.append('subject', formData.subject);
+    data.append('message', formData.message);
+
+    // Send to Node.js server
+    fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: data
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('✅ Email sent successfully!');
+        } else {
+            console.log('❌ Failed to send email');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error:', error);
+    });
+}
+</script>
+
+</body>
+</html>
